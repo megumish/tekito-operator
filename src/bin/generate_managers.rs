@@ -67,6 +67,7 @@ fn generate_manager() -> anyhow::Result<()> {
                             env!("CARGO_PKG_NAME"),
                             env!("CARGO_PKG_VERSION")
                         )),
+                        name: "manager".to_string(),
                         ..Default::default()
                     }],
                     service_account_name: Some(manager_name.clone()),
