@@ -81,14 +81,11 @@ args = ["delete", "-f", "./target/config/managers"]
 command = "kubectl"
 args = ["delete", "-f", "./target/config/rbacs"]
 
-[tasks.deploy]
+[tasks.build_and_push_operator]
 run_task = [
   { name = [
-    "clean_all_manifests",
-    "generate_all_manifests",
     "docker_build",
     "docker_push",
-    "apply_all_manifests",
   ] }
 ]
 
