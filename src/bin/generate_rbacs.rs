@@ -12,7 +12,7 @@ use k8s_openapi::api::{
 use kube::core::ObjectMeta;
 
 fn main() -> anyhow::Result<()> {
-    fs::create_dir_all("./target/config/rbac")?;
+    fs::create_dir_all("./target/config/rbacs")?;
     generate_service_account()?;
     generate_role()?;
     generate_role_binding()?;
@@ -22,7 +22,7 @@ fn main() -> anyhow::Result<()> {
 fn generate_service_account() -> anyhow::Result<()> {
     let manager_name = format!("{}-manager", env!("CARGO_PKG_NAME"));
     let file_name = format!("{}-manager-sa.yaml", env!("CARGO_PKG_NAME"));
-    let mut file = File::create(format!("./target/config/rbac/{}", file_name))?;
+    let mut file = File::create(format!("./target/config/rbacs/{}", file_name))?;
     let sa = ServiceAccount {
         metadata: ObjectMeta {
             name: Some(manager_name),
@@ -45,12 +45,20 @@ fn generate_role() -> anyhow::Result<()> {
             namespace: option_env!("OPERATOR_NS").map(ToString::to_string),
             ..Default::default()
         },
-        rules: Some(vec![PolicyRule {
-            api_groups: Some(vec!["megumi.sh".to_string()]),
-            resources: Some(vec!["*".to_string()]),
-            verbs: vec!["*".to_string()],
-            ..Default::default()
-        }]),
+        rules: Some(vec![
+            PolicyRule {
+                api_groups: Some(vec!["megumi.sh".to_string()]),
+                resources: Some(vec!["*".to_string()]),
+                verbs: vec!["*".to_string()],
+                ..Default::default()
+            },
+            PolicyRule {
+                api_groups: Some(vec!["".to_string()]),
+                resources: Some(vec!["ConfigMap".to_string()]),
+                verbs: vec!["*".to_string()],
+                ..Default::default()
+            },
+        ]),
     };
     file.write_all(serde_yaml::to_string(&role)?.as_bytes())?;
     Ok(())

@@ -60,6 +60,27 @@ args = ["apply", "-f", "./target/config/managers"]
 command = "kubectl"
 args = ["apply", "-f", "./target/config/rbacs"]
 
+[tasks.delete_all_manifests]
+run_task = [
+  { name = ["delete_crds", "delete_managers", "delete_rbacs", "delete_namespaces"] }
+]
+
+[tasks.delete_namespaces]
+command = "kubectl"
+args = ["delete", "-f", "./target/config/namespaces"]
+
+[tasks.delete_crds]
+command = "kubectl"
+args = ["delete", "-f", "./target/config/crds"]
+
+[tasks.delete_managers]
+command = "kubectl"
+args = ["delete", "-f", "./target/config/managers"]
+
+[tasks.delete_rbacs]
+command = "kubectl"
+args = ["delete", "-f", "./target/config/rbacs"]
+
 [tasks.deploy]
 run_task = [
   { name = [
@@ -68,5 +89,20 @@ run_task = [
     "docker_build",
     "docker_push",
     "apply_all_manifests",
+  ] }
+]
+
+[tasks.install]
+run_task = [
+  { name = [
+    "generate_all_manifests",
+    "apply_all_manifests",
+  ] }
+]
+
+[tasks.uninstall]
+run_task = [
+  { name = [
+    "delete_all_manifests",
   ] }
 ]
