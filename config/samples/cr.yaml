@@ -1,0 +1,6 @@
+apiVersion: megumi.sh/v1alpha1
+kind: Tekito
+metadata:
+  name: tekito-1
+spec:
+  neko: "neko"

@@ -1,0 +1,52 @@
+[env]
+DOCKER_IMAGE = "quay.io/megumish/${CARGO_MAKE_CRATE_NAME}"
+OPERATOR_NS = "tekito-operator"
+
+[tasks.clean_all_manifests]
+command = "rm"
+args = ["-rf", "./target/config"]
+
+[tasks.generate_all_manifests]
+run_task = [ 
+  { name = ["generate_crds", "generate_managers", "generate_rbacs"] }
+]
+
+[tasks.generate_crds]
+command = "cargo"
+args = ["run", "--bin", "generate_crds"]
+
+[tasks.generate_managers]
+command = "cargo"
+args = ["run", "--bin", "generate_managers"]
+
+[tasks.generate_rbacs]
+command = "cargo"
+args = ["run", "--bin", "generate_rbacs"]
+
+[tasks.docker_build]
+command = "docker"
+args = ["build", "-t", "${DOCKER_IMAGE}:v${CARGO_MAKE_CRATE_VERSION}", "."]
+
+[tasks.docker_push]
+command = "docker"
+args = ["push", "${DOCKER_IMAGE}:v${CARGO_MAKE_CRATE_VERSION}"]
+
+[tasks.create_namespace]
+command = "kubectl"
+args = ["create", "namespace", "${OPERATOR_NS}"]
+
+[tasks.apply_all_manifests]
+command = "kubectl"
+args = ["apply", "-f", "./target/config"]
+
+[tasks.deploy]
+run_task = [
+  { name = [
+    "clean_all_manifests",
+    "generate_all_manifests",
+    "docker_build",
+    "docker_push",
+    "create_namespace",
+    "apply_all_manifests",
+  ] }
+]
