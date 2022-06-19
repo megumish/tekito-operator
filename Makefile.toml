@@ -8,8 +8,12 @@ args = ["-rf", "./target/config"]
 
 [tasks.generate_all_manifests]
 run_task = [ 
-  { name = ["generate_crds", "generate_managers", "generate_rbacs"] }
+  { name = ["generate_namespaces", "generate_crds", "generate_managers", "generate_rbacs"] }
 ]
+
+[tasks.generate_namespaces]
+command = "cargo"
+args = ["run", "--bin", "generate_namespaces"]
 
 [tasks.generate_crds]
 command = "cargo"
@@ -36,8 +40,25 @@ command = "kubectl"
 args = ["create", "namespace", "${OPERATOR_NS}"]
 
 [tasks.apply_all_manifests]
+run_task = [
+  { name = ["apply_namespaces", "apply_crds", "apply_managers", "apply_rbacs"] }
+]
+
+[tasks.apply_namespaces]
 command = "kubectl"
-args = ["apply", "-f", "./target/config"]
+args = ["apply", "-f", "./target/config/namespaces"]
+
+[tasks.apply_crds]
+command = "kubectl"
+args = ["apply", "-f", "./target/config/crds"]
+
+[tasks.apply_managers]
+command = "kubectl"
+args = ["apply", "-f", "./target/config/managers"]
+
+[tasks.apply_rbacs]
+command = "kubectl"
+args = ["apply", "-f", "./target/config/rbacs"]
 
 [tasks.deploy]
 run_task = [
@@ -46,7 +67,6 @@ run_task = [
     "generate_all_manifests",
     "docker_build",
     "docker_push",
-    "create_namespace",
     "apply_all_manifests",
   ] }
 ]
