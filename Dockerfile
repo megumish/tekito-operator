@@ -17,5 +17,6 @@ FROM gcr.io/distroless/static:nonroot
 WORKDIR /
 COPY --from=builder /workspace/target/x86_64-unknown-linux-musl/release/manager .
 USER 65532:65532
+ENV RUST_LOG=debug
 
 ENTRYPOINT ["/manager"]
