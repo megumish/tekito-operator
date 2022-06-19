@@ -7,15 +7,15 @@ use std::{
 
 use k8s_openapi::api::{
     core::v1::ServiceAccount,
-    rbac::v1::{PolicyRule, Role, RoleBinding, RoleRef, Subject},
+    rbac::v1::{ClusterRole, ClusterRoleBinding, PolicyRule, RoleRef, Subject},
 };
 use kube::core::ObjectMeta;
 
 fn main() -> anyhow::Result<()> {
     fs::create_dir_all("./target/config/rbacs")?;
     generate_service_account()?;
-    generate_role()?;
-    generate_role_binding()?;
+    generate_cluster_role()?;
+    generate_cluster_role_binding()?;
     Ok(())
 }
 
@@ -35,14 +35,13 @@ fn generate_service_account() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn generate_role() -> anyhow::Result<()> {
+fn generate_cluster_role() -> anyhow::Result<()> {
     let manager_name = format!("{}-manager", env!("CARGO_PKG_NAME"));
     let file_name = format!("{}-manager-role.yaml", env!("CARGO_PKG_NAME"));
     let mut file = File::create(format!("./target/config/rbacs/{}", file_name))?;
-    let role = Role {
+    let role = ClusterRole {
         metadata: ObjectMeta {
             name: Some(format!("{}-role", manager_name)),
-            namespace: option_env!("OPERATOR_NS").map(ToString::to_string),
             ..Default::default()
         },
         rules: Some(vec![
@@ -54,21 +53,22 @@ fn generate_role() -> anyhow::Result<()> {
             },
             PolicyRule {
                 api_groups: Some(vec!["".to_string()]),
-                resources: Some(vec!["ConfigMap".to_string()]),
+                resources: Some(vec!["configmaps".to_string()]),
                 verbs: vec!["*".to_string()],
                 ..Default::default()
             },
         ]),
+        ..Default::default()
     };
     file.write_all(serde_yaml::to_string(&role)?.as_bytes())?;
     Ok(())
 }
 
-fn generate_role_binding() -> anyhow::Result<()> {
+fn generate_cluster_role_binding() -> anyhow::Result<()> {
     let manager_name = format!("{}-manager", env!("CARGO_PKG_NAME"));
     let file_name = format!("{}-manager-role-binding.yaml", env!("CARGO_PKG_NAME"));
     let mut file = File::create(format!("./target/config/rbacs/{}", file_name))?;
-    let role_binding = RoleBinding {
+    let role_binding = ClusterRoleBinding {
         metadata: ObjectMeta {
             name: Some(format!("{}-role-binding", manager_name)),
             namespace: option_env!("OPERATOR_NS").map(ToString::to_string),
@@ -76,7 +76,7 @@ fn generate_role_binding() -> anyhow::Result<()> {
         },
         role_ref: RoleRef {
             api_group: "rbac.authorization.k8s.io".to_string(),
-            kind: "Role".to_string(),
+            kind: "ClusterRole".to_string(),
             name: format!("{}-role", manager_name),
         },
         subjects: Some(vec![Subject {
