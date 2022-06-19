@@ -38,7 +38,7 @@ fn generate_service_account() -> anyhow::Result<()> {
 fn generate_role() -> anyhow::Result<()> {
     let manager_name = format!("{}-manager", env!("CARGO_PKG_NAME"));
     let file_name = format!("{}-manager-role.yaml", env!("CARGO_PKG_NAME"));
-    let mut file = File::create(format!("./target/config/rbac/{}", file_name))?;
+    let mut file = File::create(format!("./target/config/rbacs/{}", file_name))?;
     let role = Role {
         metadata: ObjectMeta {
             name: Some(format!("{}-role", manager_name)),
@@ -67,7 +67,7 @@ fn generate_role() -> anyhow::Result<()> {
 fn generate_role_binding() -> anyhow::Result<()> {
     let manager_name = format!("{}-manager", env!("CARGO_PKG_NAME"));
     let file_name = format!("{}-manager-role-binding.yaml", env!("CARGO_PKG_NAME"));
-    let mut file = File::create(format!("./target/config/rbac/{}", file_name))?;
+    let mut file = File::create(format!("./target/config/rbacs/{}", file_name))?;
     let role_binding = RoleBinding {
         metadata: ObjectMeta {
             name: Some(format!("{}-role-binding", manager_name)),
